@@ -1,18 +1,6 @@
 # SuperHero classification with Tensorflow
 
 
-## Data
-
-You can download data. See instructions [here](https://cs230-stanford.github.io/project-starter-code.html).
-
-```
-virtualenv -p python3 .env
-source .env/bin/activate
-pip install -r requirements.txt
-```
-
-When you're done working on the project, deactivate the virtual environment with `deactivate`.
-
 ## Task
 
 Given an image of a superhero recognize superhero name. The model was trained on 5 superheroes (Groot, Hulk, Ironman, Spider-Gwen and Spiderman)

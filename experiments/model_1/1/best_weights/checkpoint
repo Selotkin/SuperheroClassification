@@ -1,2 +1,2 @@
-model_checkpoint_path: "after-epoch-29"
-all_model_checkpoint_paths: "after-epoch-29"
+model_checkpoint_path: "after-epoch-24"
+all_model_checkpoint_paths: "after-epoch-24"

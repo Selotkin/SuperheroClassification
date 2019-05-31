@@ -113,6 +113,7 @@ def model_fn(mode, inputs, params, reuse=False):
         # Compute the output distribution of the model and the predictions
         logits = build_model(is_training, inputs, params)
         predictions = tf.argmax(logits, 1)
+        probabilities = tf.nn.softmax(logits, name="softmax_tensor")
 
     # Define loss and accuracy
     loss = tf.losses.sparse_softmax_cross_entropy(labels = labels, logits=logits)
@@ -177,6 +178,7 @@ def model_fn(mode, inputs, params, reuse=False):
     model_spec['metrics'] = metrics
     model_spec['update_metrics'] = update_metrics_op
     model_spec['summary_op'] = tf.summary.merge_all()
+    model_spec['probabilities'] = probabilities
     
 
     if is_training:

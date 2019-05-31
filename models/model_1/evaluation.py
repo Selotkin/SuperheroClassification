@@ -7,7 +7,7 @@ import os
 import tensorflow as tf
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from helpers.utils import save_dict_to_json
-
+import numpy as np
 
 def evaluate_sess(sess, model_spec, num_steps, writer=None, params=None):
     """Train the model on `num_steps` batches.
@@ -27,15 +27,18 @@ def evaluate_sess(sess, model_spec, num_steps, writer=None, params=None):
     sess.run(model_spec['iterator_init_op'])
     sess.run(model_spec['metrics_init_op'])
 
+    
     # compute metrics over the dataset
     for _ in range(num_steps):
         sess.run(update_metrics)
 
+    
     # Get the values of the metrics
     metrics_values = {k: v[0] for k, v in eval_metrics.items()}
     metrics_val = sess.run(metrics_values)
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_val.items())
     logging.info("- Eval metrics: " + metrics_string)
+
     # Add summaries manually to writer at global_step_val
     if writer is not None:
         global_step_val = sess.run(global_step)
@@ -65,16 +68,20 @@ def evaluate(model_spec, model_dir, params, restore_from):
 
         # Reload weights from the weights subdirectory
         save_path = os.path.join(model_dir, restore_from)
-        logging.info(model_dir)
-        logging.info(restore_from)
-        logging.info(save_path)
+
         if os.path.isdir(save_path):
             save_path = tf.train.latest_checkpoint(save_path)
         saver.restore(sess, save_path)
-       
+
         # Evaluate
         num_steps = (params.eval_size + params.batch_size - 1) // params.batch_size
         metrics = evaluate_sess(sess, model_spec, num_steps)
         metrics_name = '_'.join(restore_from.split('/'))
         save_path = os.path.join(os.path.join(model_dir, restore_from), "metrics_test_{}.json".format(metrics_name))
         save_dict_to_json(metrics, save_path)
+        sess.run(model_spec['iterator_init_op'])
+        for _ in range(num_steps):
+            labels, probabilities, predictions = sess.run([model_spec['labels'], model_spec['probabilities'], model_spec['predictions']])
+            probab = np.max(probabilities, axis = 1)
+            for i in range(len(labels)):
+                print(f'Label is: {labels[i]} and prediction is {predictions[i]} with probability {probab[i]}')
